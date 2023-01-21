@@ -35,7 +35,7 @@
       threshold: 0.1,
     })
       .search(query)
-      .map(({ item, score }) => ({ ...item, score }));
+      ?.map(({ item, score }) => ({ ...item, score }));
     if (recentResult.length > 0) {
       items = recentResult;
     }
@@ -44,7 +44,7 @@
 
     const tmpItems = recentResult.slice(0, 3);
 
-    const ids = tmpItems.map((i) => i.id);
+    const ids = tmpItems?.map((i) => i.id);
 
     searchResult.forEach((item) => {
       if (!ids.includes(item.id)) {

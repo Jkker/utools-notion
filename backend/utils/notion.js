@@ -132,8 +132,9 @@ const getRecentPageVisits = async (config) => {
 
   try {
     const { pages, recordMap } = data;
+    if (!pages || !recordMap) return [];
     const now = dayjs();
-    const result = pages.map(
+    const result = pages?.map(
       ({ id, name, iconEmoji, fullIconUrl, visitedAt }) =>
         processResultItem(id, recordMap, {
           name,
@@ -201,11 +202,11 @@ const search = async (query, config) => {
     });
 
   const { results, recordMap } = data;
-  if (results.length === 0) {
+  if (!results && results.length === 0) {
     return [];
   }
   try {
-    const result = results.map(({ id, score }) =>
+    const result = results?.map(({ id, score }) =>
       processResultItem(id, recordMap, { score })
     );
     return result;
@@ -255,11 +256,10 @@ const getUserInfo = async (config) => {
       ({ id, spaceId: _spaceId }) => _spaceId === spaceId
     ).id;
 
-    const bookmarks = recordMap.space_view[
-      spaceViewId
-    ].value.value.bookmarked_pages.map((id) =>
-      processResultItem(id, recordMap)
-    );
+    const bookmarks =
+      recordMap.space_view[spaceViewId].value.value.bookmarked_pages?.map(
+        (id) => processResultItem(id, recordMap)
+      ) ?? [];
 
     return {
       ...userInfo,
