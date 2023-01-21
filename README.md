@@ -14,7 +14,7 @@
 </div>
 
 ## 功能预览
-![Preview](https://raw.githubusercontent.com/Jkker/utools-notion/main/docs/preview.png)
+![Preview](https://raw.githubusercontent.com/Jkker/utools-notion/main/public/docs/preview.png)
 
 - 启动时显示最近访问的页面 / 收藏的页面
 - 接近官网的搜索体验
@@ -24,7 +24,7 @@
 
 ## 选项设置
 
-![Setting](https://raw.githubusercontent.com/Jkker/utools-notion/main/docs/setting.png)
+![Setting](https://raw.githubusercontent.com/Jkker/utools-notion/main/public/docs/setting.png)
 
 
 ## 使用方法
@@ -36,14 +36,14 @@
 3.  按 F12 或 Ctrl(Cmd) + Shift + I 打开开发者工具
 4.  切换到 Network(网络) 选项卡
 5.  在 Notion 中进行搜索
-    ![Perform search](https://raw.githubusercontent.com/Jkker/utools-notion/main/docs/notion-search.png)
+    ![Perform search](https://raw.githubusercontent.com/Jkker/utools-notion/main/public/docs/notion-search.png)
 7.  在 Network 选项卡中找到一个名为 "search" 的请求
 8.  在 Headers(标头) 选项卡中找到 Cookie，右键点击并复制
 
-![Get cookie from network request](https://raw.githubusercontent.com/Jkker/utools-notion/main/docs/get-cookie.png)
+    ![Get cookie from network request](https://raw.githubusercontent.com/Jkker/utools-notion/main/public/docs/get-cookie.png)
 
 ### 获取 Space ID
 
 在 Payload(负载) 选项卡中找到 Cookie，右键点击并复制
 
-![Get space id](https://raw.githubusercontent.com/Jkker/utools-notion/main/docs/get-space-id.png)
+![Get space id](https://raw.githubusercontent.com/Jkker/utools-notion/main/public/docs/get-space-id.png)
