@@ -1,0 +1,188 @@
+:root {
+  /* font-family: Inter, Avenir, Helvetica, Arial, sans-serif; */
+  font-size: 14px;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --foreground-rgb: 55, 53, 47;
+  --background-rgb: 255, 255, 255;
+  --background: rgb(var(--background-rgb));
+  --text: rgba(var(--foreground-rgb), 0.87);
+  --text-strong: rgba(var(--foreground-rgb), 1);
+  --text-desc: rgba(var(--foreground-rgb), 0.65);
+  --text-sub: rgba(var(--foreground-rgb), 0.5);
+  --bg-hover: rgba(var(--foreground-rgb), 0.08);
+  --bg-active: rgba(var(--foreground-rgb), 0.12);
+  --bg-active-hover: rgba(var(--foreground-rgb), 0.16);
+  --border: rgba(var(--foreground-rgb), 0.09);
+  --radius: 0.25rem;
+
+  --primary: 35, 131, 226;
+  --bg-primary: rgb(var(--primary));
+  --bg-primary-hover: rgb(0, 117, 211);
+  --bg-primary-active: rgb(0, 104, 195);
+  --danger: rgb(235, 87, 87);
+
+  --shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px, rgb(15 15 15 / 10%) 0px 3px 6px,
+    rgb(15 15 15 / 20%) 0px 9px 24px;
+  --ring: rgba(var(--foreground-rgb), 0.15) 0px 0px 0px 1px inset;
+  --ring-error: var(--danger) 0px 0px 0px 1px inset;
+
+  color: var(--text);
+  background-color: var(--background);
+}
+
+@supports (color-scheme: dark) {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-rgb: 36, 36, 36;
+    --bg-hover: rgba(var(--foreground-rgb), 0.055);
+    --text-sub: rgba(var(--foreground-rgb), 0.35);
+    --border: rgba(var(--foreground-rgb), 0.15);
+
+    --shadow: rgb(15 15 15 / 10%) 0px 0px 0px 1px,
+      rgb(15 15 15 / 20%) 0px 3px 6px, rgb(15 15 15 / 40%) 0px 9px 24px;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: unset;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+strong {
+  color: var(--text-strong);
+  font-weight: bold;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+input,
+textarea,
+button {
+  transition: all 0.15s ease-in-out;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+}
+
+.round-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border-radius: 32px;
+  height: 24px;
+  line-height: 24px;
+  padding: 0px 8px;
+  margin: 0px 8px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background-color: var(--background);
+}
+.round-btn:hover {
+  background: var(--bg-hover);
+}
+.round-btn:active {
+  background: var(--bg-active);
+}
+.round-btn.active {
+  border: 1px solid rgba(var(--primary), 0.35);
+  color: var(--bg-primary);
+  background: rgba(var(--primary), 0.03);
+}
+.round-btn.active:hover {
+  background: rgba(var(--primary), 0.13);
+}
+.round-btn.active:active {
+  background: rgba(var(--primary), 0.23);
+}
+.round-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--bg-hover);
+}
+.round-btn > svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  fill: currentcolor;
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+button {
+  all: unset;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  height: 32px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text);
+  line-height: 1.2;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+button:hover {
+  background: var(--bg-active);
+}
+button:active {
+  background: var(--bg-active-hover);
+}
+
+button.primary {
+  background: var(--bg-primary);
+  color: white;
+  fill: white;
+}
+button.primary:hover {
+  background: var(--bg-primary-hover);
+}
+button.primary:active {
+  background: var(--bg-primary-active);
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.danger {
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  background-color: transparent;
+}
+button.danger:hover {
+  background-color: rgb(235, 87, 87, 0.1);
+}
+button.danger:active {
+  background-color: rgb(235, 87, 87, 0.2);
+}

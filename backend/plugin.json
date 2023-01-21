@@ -1,0 +1,32 @@
+{
+  "name": "utools-notion",
+  "version": "1.0.0",
+  "description": "Notion Plugin for uTools",
+  "author": "Jkker",
+  "homepage": "https://github.com/Jkker/utools-notion",
+  "preload": "preload.js",
+  "main": "index.html",
+  "development": {
+    "main": "http://localhost:8000"
+  },
+  "platform": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "logo": "logo.png",
+  "features": [
+    {
+      "code": "Notion Search",
+      "explain": "最近浏览的页面与搜索",
+      "cmds": [
+        "ns",
+        "n",
+        "搜索Notion",
+        "Notion搜索",
+        "Recent Notion Pages",
+        "最近Notion页面"
+      ]
+    }
+  ]
+}
