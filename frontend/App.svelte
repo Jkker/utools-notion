@@ -9,12 +9,22 @@
   import Setting from "./app/Setting.svelte";
   import ContextMenu from "./components/ContextMenu.svelte";
   import Loading from "./components/Loading.svelte";
-  import config, { init as initConfig } from "./store/config";
+  import config, {
+    load as loadConfig,
+    isValid as isConfigValid,
+  } from "./store/config";
+
+  const DEBOUNCE_TIME = 250;
 
   let query = "";
-  let items: ResultItem[] = [];
-  let recent: ResultItem[] = [];
-  let loading = true,
+
+  let results: ResultItem[] = [];
+  let recentItems: ResultItem[] = [];
+  let bookmarks: ResultItem[] = [];
+
+  let bookmarkedIds: Set<string> = new Set();
+
+  let isLoading = true,
     isSettingOpen = false;
   let userInfo: UserInfo;
 
@@ -22,60 +32,55 @@
     isSettingOpen = true;
   };
 
-  $: closeSetting = async () => {
+  const closeSetting = async () => {
     isSettingOpen = false;
     query = "";
-    await getInitialItems();
+    await loadInitialItems();
   };
 
-  $: getSearchResults = async (query: string) => {
-    const recentResult = new Fuse(recent, {
+  const searchList = (items: ResultItem[], q: string): ResultItem[] => {
+    return new Fuse(items, {
       keys: ["title"],
       includeScore: true,
       threshold: 0.1,
     })
-      .search(query)
-      ?.map(({ item, score }) => ({ ...item, score }));
-    if (recentResult.length > 0) {
-      items = recentResult;
-    }
-
-    const searchResult = await window.search(query, $config);
-
-    const tmpItems = recentResult.slice(0, 3);
-
-    const ids = tmpItems?.map((i) => i.id);
-
-    searchResult.forEach((item) => {
-      if (!ids.includes(item.id)) {
-        // @ts-ignore
-        tmpItems.push(item);
-      }
-    });
-    items = [...tmpItems];
+      .search(q)
+      .slice(0, 3)
+      .map(({ item, score }) => ({ ...item, score }));
   };
 
-  $: getInitialItems = async () => {
-    loading = true;
-    recent = await window.getRecentPageVisits($config);
+  const search = debounce(async (query: string) => {
+    console.log("search", query);
+    const recentResults = searchList(recentItems, query);
+    if (recentResults.length > 0) results = recentResults;
+    else isLoading = true;
+    const recentResultIds = new Set(recentResults.map((item) => item.id));
+
+    const remoteResults = await window.search(query, $config);
+
+    results = [
+      ...recentResults,
+      ...remoteResults.filter((item) => !recentResultIds.has(item.id)),
+    ];
+    isLoading = false;
+  }, DEBOUNCE_TIME);
+
+  const loadInitialItems = debounce(async () => {
+    console.log("loadInitialItems");
+    isLoading = true;
+    recentItems = await window.getRecentPageVisits($config);
     userInfo = await window.getUserInfo($config);
-    if ($config.initialView === "recent") items = [...recent];
-    else if ($config.initialView === "favorites")
-      items = [...userInfo.bookmarks];
-    else items = [];
-    loading = false;
-  };
+    bookmarks = userInfo.bookmarks;
+    bookmarkedIds = new Set(bookmarks.map((item) => item.id));
 
-  const setQuery = debounce(async ({ text }: { text: string }) => {
+    isLoading = false;
+  }, DEBOUNCE_TIME);
+
+  const setQuery = async ({ text }: { text: string }) => {
     query = text;
-    loading = true;
-    if (query.trim()) {
-      await getSearchResults(query);
-    } else {
-      await getInitialItems();
-    }
-    loading = false;
-  }, 100);
+    if (query) await search(query);
+    else await loadInitialItems();
+  };
 
   const toggleConfig = (key: keyof typeof $config) =>
     debounce(async () => {
@@ -84,8 +89,7 @@
 
       // Reload if search config changed
       if (query.trim())
-        if (["navigableBlockContentOnly"].includes(key))
-          await getSearchResults(query);
+        if (["navigableBlockContentOnly"].includes(key)) await search(query);
     });
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -93,13 +97,13 @@
     const { key } = event;
     const current = document.activeElement as HTMLElement;
 
-    if (key === "Enter" || key === "Space") {
-      if (current) {
-        current.click();
-        window.utools.hideMainWindow();
-      }
-      return;
-    }
+    // if (key === "Enter" || key === "Space") {
+    //   if (current) {
+    //     current.click();
+    //     window.utools.hideMainWindow();
+    //   }
+    //   return;
+    // }
 
     // we're only interested in handling up & down arrow keys
     if (!["ArrowDown", "ArrowUp", "Tab"].includes(key)) {
@@ -120,11 +124,11 @@
 
     event.preventDefault();
 
-    // currently focused element (if any)
-    // get our collection of list elements and turn it into an actual array
-    const items = [...document.getElementsByClassName("item")] as HTMLElement[];
+    const domItems = [
+      ...document.getElementsByClassName("item"),
+    ] as HTMLElement[];
     // attempt to match the currently focused element to an index in our array of list elements
-    const currentIndex = items.indexOf(current);
+    const currentIndex = domItems.indexOf(current);
     // index of the list element to be newly focused
     let newIndex = 0;
 
@@ -140,22 +144,22 @@
           window.utools.subInputFocus();
           return;
         } else if (key === "Tab" || key === "ArrowUp")
-          newIndex = (currentIndex + items.length - 1) % items.length;
+          newIndex = (currentIndex + domItems.length - 1) % domItems.length;
         // if the DOWN key has been pressed, set the new index to the current index plus 1, modulo the list size
       } else {
-        newIndex = (currentIndex + 1) % items.length;
+        newIndex = (currentIndex + 1) % domItems.length;
       }
     }
 
     // blur (= unfocus) the currently focused element (whether it's a list element or not)
     current.blur();
     // focus the list element at the computed index
-    items[newIndex].focus();
-    items[newIndex].scrollIntoView({ behavior: "smooth", block: "nearest" });
+    domItems[newIndex].focus();
+    domItems[newIndex].scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
 
   onMount(async () => {
-    if ("utools" in window) {
+    if (Object.hasOwn(window, "utools")) {
       window.addEventListener("keydown", handleKeydown);
       window.utools.onPluginEnter(async () => {
         window.utools.setSubInput(setQuery as any, "Search Notion", true);
@@ -163,9 +167,16 @@
       window.utools.onPluginOut(() => {
         window.utools.setSubInputValue("");
       });
+      console.log("mounted");
 
-      if (await initConfig()) await getInitialItems();
-      else openSetting();
+      if (isConfigValid($config)) await loadInitialItems();
+      else {
+        const conf = await loadConfig();
+        if (isConfigValid(conf)) {
+          $config = conf;
+          await loadInitialItems();
+        } else openSetting();
+      }
     }
   });
 
@@ -177,21 +188,31 @@
 
 <main>
   <Setting bind:isOpen={isSettingOpen} close={closeSetting} />
-  <Navbar {query} {getInitialItems} {openSetting} {toggleConfig} />
+  <Navbar {query} {loadInitialItems} {openSetting} {toggleConfig} />
   <ContextMenu />
-  {#if items && items.length === 0}
-    {#if query.length}
+
+  {#if query}
+    <!-- Display search results -->
+    {#if results.length}
+      <ul class="search">
+        {#each results as item (item.id)}
+          <Item {item} {query} {highlight} bookmarked={bookmarkedIds.has(item.id)}/>
+        {/each}
+      </ul>
+      <!-- Display isLoading / no result message-->
+    {:else}
       <div class="message">
-        {#if loading}<Loading />
+        {#if isLoading}<Loading />
         {:else}
           {message.noResult}
         {/if}
       </div>
     {/if}
   {:else}
-    <ul class={!query.length ? "recent" : "search"}>
-      {#each items as item (item.id)}
-        <Item {item} {query} {highlight} />
+    <!-- Display recent / bookmarked items -->
+    <ul class="recent">
+      {#each $config.initialView === "recent" ? recentItems : bookmarks as item (item.id)}
+        <Item {item} {query} {highlight} bookmarked={bookmarkedIds.has(item.id)} />
       {/each}
     </ul>
   {/if}

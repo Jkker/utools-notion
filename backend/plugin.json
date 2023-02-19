@@ -9,11 +9,7 @@
   "development": {
     "main": "http://localhost:8000"
   },
-  "platform": [
-    "win32",
-    "darwin",
-    "linux"
-  ],
+  "platform": ["win32", "darwin", "linux"],
   "logo": "logo.png",
   "features": [
     {

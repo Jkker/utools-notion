@@ -11,6 +11,7 @@ declare interface ResultItem {
   id: string;
   score?: number;
   visitedAt?: number;
+  bookmarked?: boolean;
 }
 
 declare interface Config {
@@ -19,7 +20,7 @@ declare interface Config {
   userId: string;
   useDesktopApp: boolean;
   navigableBlockContentOnly: boolean;
-  initialView: "recent" | "favorites" | "none";
+  initialView: 'recent' | 'favorites' | 'none';
 }
 
 declare interface UserInfo {
@@ -37,4 +38,5 @@ declare interface Window {
   openContextMenu: (event: MouseEvent, items: any[]) => void;
   closeContextMenu: () => void;
   getUserInfo: (config: Config) => Promise<UserInfo>;
+  clearIconCache: () => void;
 }

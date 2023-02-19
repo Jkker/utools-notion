@@ -1,4 +1,4 @@
-const { fetch } = require("cross-fetch");
+const { fetch } = require('cross-fetch');
 const fetchJSON = (...args) =>
   fetch(...args)
     .catch((error) => {

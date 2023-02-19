@@ -2,18 +2,18 @@
   export let isOpen: boolean;
   export let close: () => void;
 
-  import message from "../../backend/shared/message";
-  import config, { reset, save } from "../store/config";
-  import Dialog from "../components/Dialog.svelte";
-  import Faq from "./FAQ.svelte";
+  import message from '../../backend/shared/message';
+  import config, { reset, save } from '../store/config';
+  import Dialog from '../components/Dialog.svelte';
+  import Faq from './FAQ.svelte';
   import {
     browserIcon,
     desktopIcon,
     questionIcon,
     recentIcon,
     favoriteIcon,
-  } from "./icons";
-  import RadioGroup from "../components/RadioGroup.svelte";
+  } from './icons';
+  import RadioGroup from '../components/RadioGroup.svelte';
 
   let invalidCookie = false,
     invalidSpaceId = false;
@@ -71,7 +71,7 @@
       <textarea
         id="cookie"
         name="cookie"
-        class={invalidCookie ? "invalid" : ""}
+        class={invalidCookie ? 'invalid' : ''}
         required
         rows="3"
         bind:value={$config.cookie}
@@ -88,7 +88,7 @@
         type="text"
         id="spaceId"
         name="spaceId"
-        class={invalidSpaceId ? "invalid" : ""}
+        class={invalidSpaceId ? 'invalid' : ''}
         required
         bind:value={$config.spaceId}
       />
@@ -108,9 +108,9 @@
 
     <RadioGroup
       options={[
-        { label: message.recent, value: "recent", icon: recentIcon },
-        { label: message.favorites, value: "favorites", icon: favoriteIcon },
-        { label: message.none, value: "none" },
+        { label: message.recent, value: 'recent', icon: recentIcon },
+        { label: message.favorites, value: 'favorites', icon: favoriteIcon },
+        { label: message.none, value: 'none' },
       ]}
       bind:value={$config.initialView}>{message.initialView}</RadioGroup
     >
@@ -123,6 +123,12 @@
         bind:checked={$config.navigableBlockContentOnly}
       />
     </label>
+    <button
+      class="label interactive-label"
+      on:click={() => window.clearIconCache()}
+    >
+      {message.clearIconCache}
+    </button>
 
     <div class="controls">
       <div class="controls-left">
@@ -174,6 +180,8 @@
   }
 
   .interactive-label {
+    height: unset;
+    background-color: var(--transparent);
     justify-content: space-between;
     cursor: pointer;
     transition: all 0.15s ease-in-out;
@@ -186,12 +194,12 @@
     background-color: var(--bg-active);
   }
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
   }
 
-  input[type="text"],
+  input[type='text'],
   textarea {
     width: 100%;
     border: none;
@@ -212,14 +220,14 @@
   textarea::-webkit-scrollbar {
     width: 0;
   }
-  input[type="text"]:focus,
+  input[type='text']:focus,
   textarea:focus {
     /* box-shadow: var(--shadow); */
     background-color: var(--bg-hover);
     box-shadow: rgb(35 131 226 / 57%) 0px 0px 0px 1px inset,
       rgb(35 131 226 / 35%) 0px 0px 0px 2px;
   }
-  input[type="text"].invalid,
+  input[type='text'].invalid,
   textarea.invalid {
     box-shadow: var(--ring-error);
   }

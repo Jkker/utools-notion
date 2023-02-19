@@ -1,26 +1,26 @@
-const dayjs = require("dayjs");
-dayjs.extend(require("dayjs/plugin/relativeTime"));
-dayjs.locale(require("dayjs/locale/zh-cn"));
+const dayjs = require('dayjs');
+dayjs.extend(require('dayjs/plugin/relativeTime'));
+dayjs.locale(require('dayjs/locale/zh-cn'));
 
-const fetchJSON = require("./fetch");
-const ERROR = require("./error");
-const { SEARCH_API, RECENT_PAGE_API, headers } = require("../constants");
+const fetchJSON = require('./fetch');
+const ERROR = require('./error');
+const { SEARCH_API, RECENT_PAGE_API, notionHeaders } = require('../constants');
 
 const DEBUG = false;
 
 // Helper functions
-const uuid2Id = (uuid) => uuid.replace(/-/g, "");
+const uuid2Id = (uuid) => uuid.replace(/-/g, '');
 
 const getTextContent = (text) => {
   if (!text) {
-    return "";
+    return '';
   } else if (Array.isArray(text)) {
     return (
       text?.reduce(
         (prev, current) =>
-          prev + (current[0] !== "⁍" && current[0] !== "‣" ? current[0] : ""),
-        ""
-      ) ?? ""
+          prev + (current[0] !== '⁍' && current[0] !== '‣' ? current[0] : ''),
+        ''
+      ) ?? ''
     );
   } else {
     return text;
@@ -54,7 +54,7 @@ const processResultItem = (id, recordMap, extraProps) => {
         icon = collection_value?.icon;
       }
       // block is a page => get page title & icon
-      if (parent_id && type === "page" && properties?.title) {
+      if (parent_id && type === 'page' && properties?.title) {
         title = getTextContent(properties.title);
         if (format?.page_icon) icon = format.page_icon;
       }
@@ -63,10 +63,10 @@ const processResultItem = (id, recordMap, extraProps) => {
     //* Get breadcrumbs
 
     // parent is a space
-    if (!parent_id || parent_table === "space") break;
+    if (!parent_id || parent_table === 'space') break;
 
     // parent is a collection
-    if (parent_table === "collection") {
+    if (parent_table === 'collection') {
       const parent_collection =
         recordMap.collection[parent_id].value?.value ??
         recordMap.collection[parent_id].value;
@@ -79,7 +79,7 @@ const processResultItem = (id, recordMap, extraProps) => {
     const parent_block =
       recordMap.block[parent_id].value?.value ??
       recordMap.block[parent_id].value;
-    if (parent_table === "block" && parent_block.type === "page") {
+    if (parent_table === 'block' && parent_block.type === 'page') {
       breadcrumbs.unshift(getTextContent(parent_block.properties?.title));
       stack.push(parent_block);
       continue;
@@ -89,7 +89,7 @@ const processResultItem = (id, recordMap, extraProps) => {
     stack.push(parent_block);
   }
 
-  if (!title) title = "Untitled";
+  if (!title) title = 'Untitled';
 
   const pageId = uuid2Id(id);
 
@@ -112,18 +112,18 @@ const getRecentPageVisits = async (config) => {
   if (!cookie || !spaceId) {
     throw new Error(ERROR.SETTING_NOT_FOUND);
   }
-  if (DEBUG) console.time("getRecentPageVisits fetch");
+  if (DEBUG) console.time('getRecentPageVisits fetch');
 
   const data = await fetchJSON(RECENT_PAGE_API, {
-    method: "POST",
-    headers: headers(config.cookie),
+    method: 'POST',
+    headers: notionHeaders(config.cookie),
     body: JSON.stringify({
       userId,
       spaceId,
     }),
-    redirect: "follow",
+    redirect: 'follow',
   });
-  if (DEBUG) console.timeEnd("getRecentPageVisits fetch");
+  if (DEBUG) console.timeEnd('getRecentPageVisits fetch');
 
   if (data.errorId)
     throw new Error(ERROR.RESPONSE, {
@@ -157,17 +157,17 @@ const search = async (query, config) => {
   if (!cookie || !spaceId) {
     ERROR.report(
       ERROR.SETTING_NOT_FOUND,
-      [cookie, spaceId].filter((i) => !i).join(", ")
+      [cookie, spaceId].filter((i) => !i).join(', ')
     );
     return [];
   }
 
-  if (DEBUG) console.time("search fetch");
+  if (DEBUG) console.time('search fetch');
   const data = await fetchJSON(SEARCH_API, {
-    method: "POST",
-    headers: headers(config.cookie),
+    method: 'POST',
+    headers: notionHeaders(config.cookie),
     body: JSON.stringify({
-      type: "BlocksInSpace",
+      type: 'BlocksInSpace',
       query,
       spaceId,
       limit: 20,
@@ -187,14 +187,14 @@ const search = async (query, config) => {
       },
       searchExperimentOverrides: {},
       sort: {
-        field: "relevance",
+        field: 'relevance',
       },
-      source: "quick_find_input_change",
+      source: 'quick_find_input_change',
     }),
-    redirect: "follow",
+    redirect: 'follow',
   });
 
-  if (DEBUG) console.timeEnd("search fetch");
+  if (DEBUG) console.timeEnd('search fetch');
 
   if (data.errorId)
     throw new Error(ERROR.RESPONSE, {
@@ -224,14 +224,14 @@ const getUserInfo = async (config) => {
     throw new Error(ERROR.SETTING_NOT_FOUND);
   }
 
-  if (DEBUG) console.time("userinfo fetch");
+  if (DEBUG) console.time('userinfo fetch');
 
-  const data = await fetchJSON("https://www.notion.so/api/v3/getSpaces", {
-    method: "POST",
-    headers: headers(config.cookie),
+  const data = await fetchJSON('https://www.notion.so/api/v3/getSpaces', {
+    method: 'POST',
+    headers: notionHeaders(config.cookie),
   });
 
-  if (DEBUG) console.timeEnd("userinfo fetch");
+  if (DEBUG) console.timeEnd('userinfo fetch');
 
   if (data.errorId)
     throw new Error(ERROR.RESPONSE, {
