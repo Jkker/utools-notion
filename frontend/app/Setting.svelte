@@ -12,6 +12,7 @@
     questionIcon,
     recentIcon,
     favoriteIcon,
+    externalIcon,
   } from './icons';
   import RadioGroup from '../components/RadioGroup.svelte';
 
@@ -41,6 +42,25 @@
   const closeFAQ = () => {
     faq = false;
   };
+
+  const openLoginPopup = async () => {
+    const browser = utools.ubrowser;
+
+    const cookies = await browser
+      .goto('https://www.notion.so/login')
+      .wait(() => {
+        return document.cookie.includes('notion_user_id');
+      })
+      .cookies()
+      .run({
+        width: 1200,
+        height: 800,
+      });
+
+    console.log('cookies', cookies);
+
+    await browser.hide();
+  };
 </script>
 
 <Dialog {isOpen} close={onClose} disableClose={disableSubmit}>
@@ -61,29 +81,27 @@
       >
       {message.setting}
     </h1>
-    <label class="label input-label">
-      <span
-        >{message.cookie}
-        <button class="icon-btn" on:click={openFAQ} title={message.FAQ}>
-          {@html questionIcon}
-        </button>
-      </span>
+
+    <h4>
+      {message.manualLogin}
+      <button class="icon-btn" on:click={openFAQ} title={message.FAQ}>
+        {@html questionIcon}
+      </button>
+    </h4>
+
+    <label class="label input-label" for="cookie">
+      <span>{message.cookie} </span>
       <textarea
         id="cookie"
         name="cookie"
         class={invalidCookie ? 'invalid' : ''}
         required
-        rows="3"
+        rows="1"
         bind:value={$config.cookie}
       />
     </label>
-    <label class="label input-label">
-      <span
-        >{message.spaceId}
-        <button class="icon-btn" on:click={openFAQ} title={message.FAQ}>
-          {@html questionIcon}
-        </button></span
-      >
+    <label class="label input-label" for="spaceId">
+      <span>{message.spaceId}</span>
       <input
         type="text"
         id="spaceId"
@@ -93,6 +111,14 @@
         bind:value={$config.spaceId}
       />
     </label>
+
+    <!-- <label class="label btn-label">
+      <h4>{message.autoLogin}</h4>
+      <button class="round-btn active" on:click={openLoginPopup}>
+        {@html externalIcon}
+        {message.loginInPopup}</button
+      >
+    </label> -->
 
     <RadioGroup
       bind:value={$config.useDesktopApp}
@@ -148,6 +174,12 @@
 </Dialog>
 
 <style>
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
   .controls {
     display: flex;
     gap: 0.5rem;
@@ -192,6 +224,10 @@
   }
   .interactive-label:active {
     background-color: var(--bg-active);
+  }
+
+  .btn-label {
+    justify-content: space-between;
   }
 
   input[type='checkbox'] {

@@ -1,22 +1,22 @@
 <script lang="ts">
-  import Fuse from "fuse.js";
-  import debounce from "lodash.debounce";
-  import "modern-css-reset/dist/reset.min.css";
-  import { onMount } from "svelte";
-  import message from "../backend/shared/message";
-  import Item from "./app/Item.svelte";
-  import Navbar from "./app/Navbar.svelte";
-  import Setting from "./app/Setting.svelte";
-  import ContextMenu from "./components/ContextMenu.svelte";
-  import Loading from "./components/Loading.svelte";
+  import Fuse from 'fuse.js';
+  import debounce from 'lodash.debounce';
+  import 'modern-css-reset/dist/reset.min.css';
+  import { onMount } from 'svelte';
+  import message from '../backend/shared/message';
+  import Item from './app/Item.svelte';
+  import Navbar from './app/Navbar.svelte';
+  import Setting from './app/Setting.svelte';
+  import ContextMenu from './components/ContextMenu.svelte';
+  import Loading from './components/Loading.svelte';
   import config, {
     load as loadConfig,
     isValid as isConfigValid,
-  } from "./store/config";
+  } from './store/config';
 
   const DEBOUNCE_TIME = 250;
 
-  let query = "";
+  let query = '';
 
   let results: ResultItem[] = [];
   let recentItems: ResultItem[] = [];
@@ -34,13 +34,13 @@
 
   const closeSetting = async () => {
     isSettingOpen = false;
-    query = "";
+    query = '';
     await loadInitialItems();
   };
 
   const searchList = (items: ResultItem[], q: string): ResultItem[] => {
     return new Fuse(items, {
-      keys: ["title"],
+      keys: ['title'],
       includeScore: true,
       threshold: 0.1,
     })
@@ -50,7 +50,7 @@
   };
 
   const search = debounce(async (query: string) => {
-    console.log("search", query);
+    console.log('search', query);
     const recentResults = searchList(recentItems, query);
     if (recentResults.length > 0) results = recentResults;
     else isLoading = true;
@@ -66,11 +66,21 @@
   }, DEBOUNCE_TIME);
 
   const loadInitialItems = debounce(async () => {
-    console.log("loadInitialItems");
+    console.log('loadInitialItems');
     isLoading = true;
-    recentItems = await window.getRecentPageVisits($config);
     userInfo = await window.getUserInfo($config);
-    bookmarks = userInfo.bookmarks;
+    console.log(
+      `🚀 ~ file: App.svelte:72 ~ loadInitialItems ~ userInfo:`,
+      userInfo
+    );
+
+    if (!userInfo) {
+      openSetting();
+      return;
+    }
+
+    recentItems = (await window.getRecentPageVisits($config)) ?? [];
+    bookmarks = userInfo?.bookmarks ?? [];
     bookmarkedIds = new Set(bookmarks.map((item) => item.id));
 
     isLoading = false;
@@ -89,7 +99,7 @@
 
       // Reload if search config changed
       if (query.trim())
-        if (["navigableBlockContentOnly"].includes(key)) await search(query);
+        if (['navigableBlockContentOnly'].includes(key)) await search(query);
     });
 
   const handleKeydown = (event: KeyboardEvent) => {
@@ -97,16 +107,7 @@
     const { key } = event;
     const current = document.activeElement as HTMLElement;
 
-    // if (key === "Enter" || key === "Space") {
-    //   if (current) {
-    //     current.click();
-    //     window.utools.hideMainWindow();
-    //   }
-    //   return;
-    // }
-
-    // we're only interested in handling up & down arrow keys
-    if (!["ArrowDown", "ArrowUp", "Tab"].includes(key)) {
+    if (!['ArrowDown', 'ArrowUp', 'Tab'].includes(key)) {
       if (
         key.length === 1 &&
         key.match(/^[a-z0-9]+$/i) &&
@@ -125,7 +126,7 @@
     event.preventDefault();
 
     const domItems = [
-      ...document.getElementsByClassName("item"),
+      ...document.getElementsByClassName('item'),
     ] as HTMLElement[];
     // attempt to match the currently focused element to an index in our array of list elements
     const currentIndex = domItems.indexOf(current);
@@ -138,12 +139,12 @@
       // otherwise, the currently focused element is an item in our list
     } else {
       // if the UP key has been pressed, set the new index to the current index minus 1, plus the list size, modulo the list size
-      if (key === "ArrowUp" || (key === "Tab" && event.shiftKey)) {
+      if (key === 'ArrowUp' || (key === 'Tab' && event.shiftKey)) {
         if (currentIndex === 0) {
           current.blur();
           window.utools.subInputFocus();
           return;
-        } else if (key === "Tab" || key === "ArrowUp")
+        } else if (key === 'Tab' || key === 'ArrowUp')
           newIndex = (currentIndex + domItems.length - 1) % domItems.length;
         // if the DOWN key has been pressed, set the new index to the current index plus 1, modulo the list size
       } else {
@@ -155,19 +156,19 @@
     current.blur();
     // focus the list element at the computed index
     domItems[newIndex].focus();
-    domItems[newIndex].scrollIntoView({ behavior: "smooth", block: "nearest" });
+    domItems[newIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   onMount(async () => {
-    if (Object.hasOwn(window, "utools")) {
-      window.addEventListener("keydown", handleKeydown);
+    if (Object.hasOwn(window, 'utools')) {
+      window.addEventListener('keydown', handleKeydown);
       window.utools.onPluginEnter(async () => {
-        window.utools.setSubInput(setQuery as any, "Search Notion", true);
+        window.utools.setSubInput(setQuery as any, 'Search Notion', true);
       });
       window.utools.onPluginOut(() => {
-        window.utools.setSubInputValue("");
+        window.utools.setSubInputValue('');
       });
-      console.log("mounted");
+      console.log('mounted');
 
       if (isConfigValid($config)) await loadInitialItems();
       else {
@@ -182,7 +183,7 @@
 
   $: highlight = (text: string, query: string) =>
     query
-      ? text.replace(new RegExp(`(${query})`, "gi"), "<strong>$1</strong>")
+      ? text.replace(new RegExp(`(${query})`, 'gi'), '<strong>$1</strong>')
       : text;
 </script>
 
@@ -196,7 +197,12 @@
     {#if results.length}
       <ul class="search">
         {#each results as item (item.id)}
-          <Item {item} {query} {highlight} bookmarked={bookmarkedIds.has(item.id)}/>
+          <Item
+            {item}
+            {query}
+            {highlight}
+            bookmarked={bookmarkedIds.has(item.id)}
+          />
         {/each}
       </ul>
       <!-- Display isLoading / no result message-->
@@ -211,8 +217,13 @@
   {:else}
     <!-- Display recent / bookmarked items -->
     <ul class="recent">
-      {#each $config.initialView === "recent" ? recentItems : bookmarks as item (item.id)}
-        <Item {item} {query} {highlight} bookmarked={bookmarkedIds.has(item.id)} />
+      {#each $config.initialView === 'recent' ? recentItems : bookmarks as item (item.id)}
+        <Item
+          {item}
+          {query}
+          {highlight}
+          bookmarked={bookmarkedIds.has(item.id)}
+        />
       {/each}
     </ul>
   {/if}

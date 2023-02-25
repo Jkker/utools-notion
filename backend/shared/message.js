@@ -39,6 +39,11 @@ const message = {
 
   clearIconCache: '清除图标缓存',
   clearIconCacheSuccess: '图标缓存清除成功',
+
+  login: '登陆',
+  manualLogin: '手动输入配置',
+  autoLogin: '自动获取配置',
+  loginInPopup: '在弹窗中登陆 Notion',
 };
 
 export default message;
